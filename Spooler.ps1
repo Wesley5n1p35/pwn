@@ -33,9 +33,7 @@ $entryName = "Spooler"
 New-ItemProperty -Path $registryKeyPath -Name $entryName -Value $programPath -PropertyType String
 
 # Execute the .cmd script with the window closed
-Start-Process -FilePath "cmd.exe" -ArgumentList "/c $cmdScriptPath" -WindowStyle Hidden
-
-Start-Sleep -Seconds 5
+Start-Process -FilePath "cmd.exe" -ArgumentList "/c $cmdScriptPath" -WindowStyle Hidden -Wait
 
 $fileName = [System.IO.Path]::Combine($env:USERPROFILE, "Library\play.cmd")
 
