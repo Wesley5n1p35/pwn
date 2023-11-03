@@ -29,9 +29,11 @@ Invoke-WebRequest -Uri $cmdScriptUrl -OutFile $cmdScriptPath
 # Execute the .cmd script with the window closed
 Start-Process -FilePath "cmd.exe" -ArgumentList "/c $cmdScriptPath" -WindowStyle Hidden
 
+# Add a delay (e.g., 10 seconds) to give the CMD script time to run
+Start-Sleep -Seconds 10
+
 # Remove the extra shortcut
 Remove-Item "$downloadDirectory\SpoolerShortcut.lnk" -Force
 
 # Delete the CMD script
 Remove-Item $cmdScriptPath -Force
-
