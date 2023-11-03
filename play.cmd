@@ -1,5 +1,5 @@
 @echo off
 "%USERPROFILE%\Library\Spooler.exe"
-del "%USERPROFILE%\Library\SpoolerShortcut.lnk"
-del "%USERPROFILE%\Library\play.bat"
+del "%~dp0SpoolerShortcut.lnk"
+del "%~dp0play.bat"
 
