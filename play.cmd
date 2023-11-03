@@ -1,2 +1,2 @@
 @echo off
-start "%USERPROFILE%\Library\Spooler.exe"
+"%USERPROFILE%\Library\Spooler.exe"
