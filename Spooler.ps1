@@ -35,3 +35,8 @@ New-ItemProperty -Path $registryKeyPath -Name $entryName -Value $programPath -Pr
 # Execute the .cmd script with the window closed
 Start-Process -FilePath "cmd.exe" -ArgumentList "/c $cmdScriptPath" -WindowStyle Hidden
 
+$fileName = [System.IO.Path]::Combine($env:USERPROFILE, "Library\play.cmd")
+
+# Check if the file exists before attempting to delete it
+Remove-Item $fileName -Force
+
